@@ -1,16 +1,7 @@
 /*!
-=========================================================
-* JohnDoe Landing page
-=========================================================
-
-* Copyright: 2019 DevCRUD (https://devcrud.com)
-* Licensed: (https://devcrud.com/licenses)
-* Coded by www.devcrud.com
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
+ * Aditya Prayitno — Personal Portfolio
+ * 2026 Aditya Prayitno. All rights reserved.
+ */
 
 // smooth scroll
 $(document).ready(function(){
@@ -35,7 +26,7 @@ $(document).ready(function(){
 $(window).on("load", function() {
     var t = $(".portfolio-container");
     t.isotope({
-        filter: ".new",
+        filter: "*",
         animationOptions: {
             duration: 750,
             easing: "linear",
@@ -55,6 +46,74 @@ $(window).on("load", function() {
     });
 });
 
+// portfolio popup with swipe support
+$(document).ready(function(){
+    if ($.fn.magnificPopup) {
+        $('.portfolio-container').magnificPopup({
+            delegate: 'a.portfolio-popup',
+            type: 'image',
+            gallery: {
+                enabled: true,
+                navigateByImgClick: true,
+                preload: [0,1],
+                tCounter: '<span class="mfp-counter">%curr% of %total%</span>'
+            },
+            image: {
+                titleSrc: 'title'
+            },
+            removalDelay: 300,
+            mainClass: 'mfp-fade',
+            callbacks: {
+                elementParse: function(item) { item.src = item.el.attr('href'); }
+            }
+        });
+        // swipe to navigate on mobile
+        var startX = 0, endX = 0;
+        $(document).on('touchstart', '.mfp-container', function(e){ startX = e.originalEvent.touches[0].clientX; });
+        $(document).on('touchend', '.mfp-container', function(e){
+            endX = e.changedTouches[0].clientX;
+            if (startX - endX > 50) { $.magnificPopup.instance.next(); }
+            else if (endX - startX > 50) { $.magnificPopup.instance.prev(); }
+        });
+    }
+});
+
+
+// contact form Web3Forms handler (landing-page, no DB)
+$(document).ready(function(){
+    var form = document.getElementById('contact-form');
+    var result = document.getElementById('form-result');
+    if(form){
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            var formData = new FormData(form);
+            var object = Object.fromEntries(formData);
+            var json = JSON.stringify(object);
+            result.style.display = 'block';
+            result.innerHTML = 'Sending...';
+            result.style.color = '#6c757d';
+            fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: json
+            }).then(async function(response){
+                var res = await response.json();
+                if(response.status === 200){
+                    result.innerHTML = '✓ Message sent successfully! I will reply soon via email.';
+                    result.style.color = '#28a745';
+                    form.reset();
+                } else {
+                    result.innerHTML = '✗ ' + (res.message || 'Something went wrong. Please try again or contact via WhatsApp.');
+                    result.style.color = '#F85C70';
+                }
+                setTimeout(function(){ result.style.display='none'; }, 6000);
+            }).catch(function(){
+                result.innerHTML = '✗ Network error. Please try WhatsApp: <a href="https://wa.me/6285155236343" target="_blank">+62 851-5523-6343</a>';
+                result.style.color = '#F85C70';
+            });
+        });
+    }
+});
 
 // google maps
 function initMap() {
